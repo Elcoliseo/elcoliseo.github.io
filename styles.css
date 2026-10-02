@@ -429,6 +429,9 @@ img { max-width: 100%; }
 .slot input:disabled { cursor: not-allowed; }
 .slot input:disabled + span { opacity: .45; background: transparent; }
 .slot input:disabled + span strong { text-decoration: line-through; }
+.busy-note { margin-bottom: .75rem; color: var(--ink-soft); font-weight: 600; }
+.busy-note:empty { display: none; }
+.slot input:disabled + span small { font-weight: 700; }
 .slots-note { margin-top: .75rem; color: var(--ink-soft); font-size: .95rem; max-width: 36rem; }
 
 /* Calendar */

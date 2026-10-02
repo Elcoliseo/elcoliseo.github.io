@@ -144,10 +144,8 @@
 
   const calendar = mountCalendar($('#cal'), (d) => {
     state.date = d;
-    // Drop any chosen hour that has already passed on the new date.
-    if (state.time !== '' && isPast(state.time)) state.time = '';
-    if (state.qStart !== '' && isPast(state.qStart)) { state.qStart = ''; state.qEnd = ''; }
-    render(false);
+    loadBusy();           // consulta qué horarios ya están ocupados ese día
+    render(false);        // updateTimes() descarta las horas que ya pasaron o que están ocupadas
   });
 
   // ---------- Hourly turns ----------
@@ -162,10 +160,84 @@
   startSel.innerHTML = '<option value="">Elegí la hora</option>' +
     range(open, close).map((h) => `<option value="${h}">${fmtHour(h)}</option>`).join('');
 
+  // ---------- Horarios ocupados ----------
+  // Para el día elegido se consulta (sin nombres ni datos personales) qué canchas ya están
+  // reservadas y de qué hora a qué hora. Si la consulta falla, simplemente no se marcan:
+  // el pedido se puede enviar igual.
+  const busyNote = $('#busy-note');
+  const busyCache = new Map();
+  let busyRows = null;          // null = todavía no se sabe
+  let busyToken = 0;
+
+  async function fetchBusy(dateIso) {
+    const hit = busyCache.get(dateIso);
+    if (hit && Date.now() - hit.t < 30000) return hit.rows;
+
+    const controller = new AbortController();
+    const timer = setTimeout(() => controller.abort(), 8000);
+    try {
+      const res = await fetch(`${SUPABASE.url}/rest/v1/rpc/horarios_ocupados`, {
+        method: 'POST',
+        headers: { apikey: SUPABASE.key, 'Content-Type': 'application/json' },
+        body: JSON.stringify({ p_fecha: dateIso }),
+        signal: controller.signal,
+      });
+      if (!res.ok) throw new Error(`HTTP ${res.status}`);
+      const rows = await res.json();
+      busyCache.set(dateIso, { t: Date.now(), rows });
+      return rows;
+    } finally {
+      clearTimeout(timer);
+    }
+  }
+
+  async function loadBusy() {
+    const token = ++busyToken;
+    busyRows = null;
+    busyNote.textContent = '';
+    if (!state.date) return;
+
+    busyNote.textContent = 'Consultando horarios ocupados…';
+    try {
+      const rows = await fetchBusy(iso(state.date));
+      if (token !== busyToken) return;
+      busyRows = rows;
+      busyNote.textContent = rows.length ? 'Los horarios tachados ya están reservados.' : '';
+    } catch (e) {
+      if (token !== busyToken) return;
+      busyNote.textContent = '';
+    }
+    render(false);
+  }
+
+  // Números de cancha como están en la base de datos: cancha-1 a cancha-5, padel-1 y padel-2.
+  const courtId = (c) => (c.sport === 'padel' ? `padel-${c.n}` : `cancha-${c.n}`);
+  const takenAt = (id, h) => busyRows.some((r) => r.cancha_id === id && r.hora_inicio <= h && h < r.hora_fin);
+
+  // 'free', 'busy' (la cancha elegida está ocupada) o 'full' (están ocupadas todas las del deporte).
+  function slotStatus(h) {
+    if (!busyRows || !hasCourt() || !state.sport) return 'free';
+    const mine = COURTS.filter((c) => c.sport === state.sport && (!state.n || String(c.n) === String(state.n)));
+    if (!mine.length) return 'free';
+    return mine.every((c) => takenAt(courtId(c), h)) ? (state.n ? 'busy' : 'full') : 'free';
+  }
+
+  const quinchoTaken = (h) => !!busyRows && takenAt('quincho', h);
+
   function rebuildEnd() {
     const from = state.qStart === '' ? open + 1 : state.qStart + 1;
+
+    // El evento no puede pisar otra reserva: el fin llega hasta el próximo horario ocupado.
+    let limit = close;
+    if (state.qStart !== '' && busyRows) {
+      busyRows
+        .filter((r) => r.cancha_id === 'quincho' && r.hora_inicio > state.qStart)
+        .forEach((r) => { limit = Math.min(limit, r.hora_inicio); });
+    }
+    if (state.qEnd !== '' && state.qEnd > limit) state.qEnd = '';
+
     endSel.innerHTML = '<option value="">Elegí la hora</option>' +
-      range(from, close + 1).map((h) => `<option value="${h}">${fmtHour(h)}</option>`).join('');
+      range(from, limit + 1).map((h) => `<option value="${h}">${fmtHour(h)}</option>`).join('');
     endSel.disabled = state.qStart === '';
     endSel.value = state.qEnd === '' ? '' : String(state.qEnd);
   }
@@ -173,10 +245,22 @@
   function updateTimes() {
     slotsEl.querySelectorAll('input').forEach((r) => {
       const h = Number(r.value);
-      r.disabled = isPast(h);
+      const st = slotStatus(h);
+      r.disabled = isPast(h) || st !== 'free';
+      if (r.disabled && state.time === h) state.time = '';
       r.checked = state.time === h;
+      r.parentElement.querySelector('small').textContent =
+        st === 'busy' ? 'Ocupada' : st === 'full' ? 'Completo' : `a ${fmtHour(h + 1)}`;
     });
-    [...startSel.options].forEach((o) => { if (o.value !== '') o.disabled = isPast(Number(o.value)); });
+
+    [...startSel.options].forEach((o) => {
+      if (o.value === '') return;
+      const h = Number(o.value);
+      const taken = quinchoTaken(h);
+      o.disabled = isPast(h) || taken;
+      o.textContent = taken ? `${fmtHour(h)} · ocupado` : fmtHour(h);
+      if (o.disabled && state.qStart === h) { state.qStart = ''; state.qEnd = ''; }
+    });
     startSel.value = state.qStart === '' ? '' : String(state.qStart);
     rebuildEnd();
   }

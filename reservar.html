@@ -1,0 +1,228 @@
+<!doctype html>
+<html lang="es-AR">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <title>Reservar cancha o quincho | El Coliseo, Posadas</title>
+  <meta name="description" content="Reservá una cancha de fútbol 5, fútbol 6 o pádel, el quincho con parrilla o el combo cancha + quincho en El Coliseo, Posadas. Elegí día y horario y enviá el pedido por WhatsApp.">
+  <meta name="theme-color" content="#007abd">
+  <meta property="og:type" content="website">
+  <meta property="og:locale" content="es_AR">
+  <meta property="og:title" content="Reservar | El Coliseo">
+  <meta property="og:description" content="Elegí cancha o quincho, día y horario. Enviá tu pedido por WhatsApp.">
+  <meta property="og:image" content="assets/logo-completo.png">
+  <link rel="icon" type="image/png" href="assets/favicon.png">
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Big+Shoulders+Display:wght@700;800;900&family=Hanken+Grotesk:wght@400;500;600;700;800&display=swap" rel="stylesheet">
+  <link rel="stylesheet" href="styles.css">
+</head>
+<body data-page="reservar">
+  <a class="skip" href="#contenido">Saltar al contenido</a>
+
+  <header class="site-header">
+    <div class="wrap bar">
+      <a class="brand" href="index.html" aria-label="El Coliseo, inicio">
+        <img class="brand-mark" src="assets/logo-icono.png" width="214" height="138" alt="">
+        <span>El Coliseo</span>
+      </a>
+      <nav class="nav" id="nav" aria-label="Principal">
+        <a href="index.html" data-nav="inicio">Inicio</a>
+        <a href="canchas.html" data-nav="canchas">Canchas</a>
+        <a href="quincho.html" data-nav="quincho">Quincho</a>
+        <a href="contacto.html" data-nav="contacto">Contacto</a>
+      </nav>
+      <a class="btn btn-primary bar-cta" href="reservar.html" aria-current="page">Reservar</a>
+      <button class="menu-toggle" type="button" aria-expanded="false" aria-controls="nav" aria-label="Abrir menú"><span></span></button>
+    </div>
+  </header>
+
+  <main id="contenido">
+    <section class="page-hero">
+      <div class="wrap">
+        <h1>Reservar</h1>
+        <p class="lede">Elegí qué querés reservar, marcá el día y el horario, y enviá el pedido por WhatsApp. La reserva queda confirmada cuando te respondemos.</p>
+      </div>
+    </section>
+
+    <section class="booking" aria-label="Formulario de reserva">
+      <div class="wrap booking-layout">
+
+        <form id="booking" class="wizard" novalidate>
+
+          <fieldset class="step" id="step-type">
+            <legend>Qué querés reservar</legend>
+            <div class="choice-grid">
+              <label class="choice">
+                <input type="radio" name="type" value="cancha">
+                <span class="choice-body">
+                  <svg viewBox="0 0 24 24" aria-hidden="true"><rect x="3" y="5" width="18" height="14" rx="1.5"/><path d="M12 5v14"/><circle cx="12" cy="12" r="3"/></svg>
+                  <strong>Cancha</strong>
+                  <small>Fútbol 5, fútbol 6 o pádel</small>
+                </span>
+              </label>
+              <label class="choice">
+                <input type="radio" name="type" value="quincho">
+                <span class="choice-body">
+                  <svg viewBox="0 0 24 24" aria-hidden="true"><path d="M4 11h16M4 14.5h16"/><path d="M7 14.5 5.5 21M17 14.5l1.5 6.5"/><path d="M9 8c0-1.6 1.5-1.6 1.5-3.5M14 8c0-1.6 1.5-1.6 1.5-3.5"/></svg>
+                  <strong>Quincho con parrilla</strong>
+                  <small>Cumpleaños y eventos</small>
+                </span>
+              </label>
+              <label class="choice">
+                <input type="radio" name="type" value="combo">
+                <span class="choice-body">
+                  <svg viewBox="0 0 24 24" aria-hidden="true"><rect x="3" y="4" width="12" height="9" rx="1"/><path d="M9 4v9"/><path d="M11 17h10M11 20.5h10"/></svg>
+                  <strong>Combo cancha + quincho</strong>
+                  <small>El mismo día, en un solo pedido</small>
+                </span>
+              </label>
+            </div>
+          </fieldset>
+
+          <fieldset class="step" id="step-court" data-for="cancha combo" hidden>
+            <legend>Elegí la cancha</legend>
+            <div class="seg" role="radiogroup" aria-label="Deporte">
+              <label class="choice"><input type="radio" name="sport" value="f5"><span class="choice-body"><strong>Fútbol 5</strong></span></label>
+              <label class="choice"><input type="radio" name="sport" value="f6"><span class="choice-body"><strong>Fútbol 6</strong></span></label>
+              <label class="choice"><input type="radio" name="sport" value="padel"><span class="choice-body"><strong>Pádel</strong></span></label>
+            </div>
+            <figure class="plan-card">
+              <svg id="plan" class="plan-svg" viewBox="-14 -12 668 544" role="group" aria-label="Plano del complejo con las 7 canchas"></svg>
+            </figure>
+            <p id="court-status" class="court-hint" aria-live="polite"></p>
+          </fieldset>
+
+          <fieldset class="step" id="step-event" data-for="quincho combo" hidden>
+            <legend>Datos del quincho</legend>
+            <div class="field-row">
+              <div class="field">
+                <label for="q-event">Tipo de evento</label>
+                <select id="q-event" name="event">
+                  <option value="">Elegí una opción</option>
+                  <option>Cumpleaños</option>
+                  <option>Evento infantil</option>
+                  <option>Reunión de amigos o familia</option>
+                  <option>Otro</option>
+                </select>
+              </div>
+              <div class="field">
+                <label for="q-people">Cantidad de personas</label>
+                <input id="q-people" name="people" type="number" min="1" inputmode="numeric">
+              </div>
+            </div>
+          </fieldset>
+
+          <fieldset class="step" id="step-date" data-for="cancha quincho combo" hidden>
+            <legend>Elegí el día</legend>
+            <div id="cal" class="cal"></div>
+            <p class="cal-note">Los días pasados no se pueden elegir.</p>
+          </fieldset>
+
+          <fieldset class="step" id="step-time" data-for="cancha quincho combo" hidden>
+            <legend>Elegí el horario</legend>
+            <div class="time-block" data-for="cancha combo">
+              <h3>Cancha</h3>
+              <div class="field">
+                <label for="t-time">Horario de la cancha</label>
+                <input id="t-time" name="time" type="time">
+              </div>
+            </div>
+            <div class="time-block" data-for="quincho combo">
+              <h3>Quincho</h3>
+              <div class="field-row">
+                <div class="field">
+                  <label for="q-start">Desde</label>
+                  <input id="q-start" name="qStart" type="time">
+                </div>
+                <div class="field">
+                  <label for="q-end">Hasta <span class="opt">(opcional)</span></label>
+                  <input id="q-end" name="qEnd" type="time">
+                </div>
+              </div>
+            </div>
+          </fieldset>
+
+          <fieldset class="step" id="step-contact" data-for="cancha quincho combo" hidden>
+            <legend>Tus datos</legend>
+            <div class="field">
+              <label for="f-name">Tu nombre</label>
+              <input id="f-name" name="name" type="text" autocomplete="name">
+            </div>
+            <div class="field" style="margin-top: 1rem">
+              <label for="f-notes">Comentarios <span class="opt">(opcional)</span></label>
+              <textarea id="f-notes" name="notes"></textarea>
+            </div>
+          </fieldset>
+        </form>
+
+        <aside class="summary" aria-labelledby="sum-title">
+          <h2 id="sum-title">Tu reserva</h2>
+          <dl id="sum-list" class="sum-list"></dl>
+          <div id="sum-error" class="sum-error" role="alert" hidden></div>
+          <button id="send" class="btn btn-sun btn-lg" type="submit" form="booking">
+            <svg class="ico" viewBox="0 0 24 24" aria-hidden="true"><path d="M12 3a9 9 0 0 0-7.8 13.5L3 21l4.6-1.2A9 9 0 1 0 12 3z" fill="none" stroke="currentColor" stroke-width="2" stroke-linejoin="round"/><path d="M9 8.5c0 3.5 3 6.5 6.5 6.5l1-1.6-2-1-1 .8c-1-.4-1.9-1.3-2.3-2.3l.8-1-1-2z" fill="currentColor"/></svg>
+            Enviar por WhatsApp
+          </button>
+          <p id="sum-done" class="sum-done" aria-live="polite" hidden></p>
+          <p class="sum-note">Se abre WhatsApp con el mensaje armado. Todavía no es una reserva confirmada: te respondemos con la disponibilidad.</p>
+        </aside>
+      </div>
+    </section>
+
+    <section class="faq" aria-labelledby="faq-title">
+      <div class="wrap">
+        <div class="section-head">
+          <h2 id="faq-title" class="section-title">Preguntas frecuentes</h2>
+        </div>
+        <div class="faq-list">
+          <details>
+            <summary>¿Cómo reservo?</summary>
+            <p>Elegís cancha, quincho o combo, marcás el día y el horario, y enviás el pedido. Se abre WhatsApp con el mensaje ya escrito para que solo tengas que mandarlo.</p>
+          </details>
+          <details>
+            <summary>¿La reserva se confirma al instante?</summary>
+            <p>No. El pedido llega por WhatsApp y queda confirmado cuando te respondemos con la disponibilidad.</p>
+          </details>
+          <details>
+            <summary>¿Puedo reservar la cancha y el quincho el mismo día?</summary>
+            <p>Sí. Elegí la opción combo y pedí las dos cosas en una sola solicitud.</p>
+          </details>
+          <details>
+            <summary>¿Para qué eventos sirve el quincho?</summary>
+            <p>Está pensado para cumpleaños y eventos infantiles, y también sirve para reuniones de amigos o familia. Si tenés otro tipo de evento, contanoslo en los comentarios.</p>
+          </details>
+          <details>
+            <summary>¿Dónde están?</summary>
+            <p>En Av. Tambor de Tacuarí 6377, Posadas, Misiones. <a href="contacto.html">Mirá el mapa</a>.</p>
+          </details>
+        </div>
+      </div>
+    </section>
+  </main>
+
+  <footer class="site-footer">
+    <div class="wrap foot-grid">
+      <p class="foot-brand"><img src="assets/logo-completo.png" width="218" height="188" alt="El Coliseo, complejo deportivo"></p>
+      <div>
+        <p class="foot-title">Complejo</p>
+        <ul>
+          <li><a href="canchas.html">Canchas</a></li>
+          <li><a href="quincho.html">Quincho con parrilla</a></li>
+          <li><a href="reservar.html">Reservar</a></li>
+          <li><a href="contacto.html">Contacto</a></li>
+        </ul>
+      </div>
+      <div>
+        <p class="foot-title">Contacto</p>
+        <address>Av. Tambor de Tacuarí 6377<br>Posadas, Misiones</address>
+        <p><a data-wa href="https://wa.me/5493764110811">+54 9 376 411-0811</a></p>
+      </div>
+    </div>
+    <div class="wrap foot-base"><p>© 2026 El Coliseo. Posadas, Misiones.</p></div>
+  </footer>
+
+  <script src="js/common.js"></script>
+  <script src="js/reservar.js"></script>
+</body>
+</html>

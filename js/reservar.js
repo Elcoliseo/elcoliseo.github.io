@@ -1,7 +1,7 @@
 (() => {
   'use strict';
 
-  const { SPORTS, COURTS, HOURS, PRICES, fmtHour, fmtMoney, courtPrice, mountPlan, waLink } = window.Coliseo;
+  const { SUPABASE, SPORTS, COURTS, HOURS, PRICES, fmtHour, fmtMoney, courtPrice, mountPlan, waLink } = window.Coliseo;
 
   const $ = (sel, root = document) => root.querySelector(sel);
 
@@ -365,10 +365,79 @@
 
     sumError.hidden = true;
     const url = waLink(buildMessage());
+    const rows = requestRows();
+
+    // Primero se abre WhatsApp (el navegador solo lo permite justo después del toque)
+    // y en paralelo se anota el pedido en el sistema del complejo.
     window.open(url, '_blank', 'noopener');
     sumDone.hidden = false;
-    sumDone.innerHTML = `Se abrió WhatsApp con tu mensaje. Si no se abrió, <a href="${url}" target="_blank" rel="noopener">tocá acá</a>. La reserva queda confirmada cuando te respondemos.`;
+    sumDone.innerHTML = `Se abrió WhatsApp con tu mensaje. Si no se abrió, <a href="${url}" target="_blank" rel="noopener">tocá acá</a>. La reserva queda confirmada cuando te respondemos. <span id="sum-saved"></span>`;
+
+    saveRequest(rows).then((result) => {
+      const note = $('#sum-saved');
+      if (!note) return;
+      note.textContent = result === 'error'
+        ? 'No pudimos anotar tu pedido en el sistema, pero con el mensaje de WhatsApp alcanza.'
+        : 'Tu pedido también quedó anotado en el sistema del complejo.';
+    });
   });
+
+  // ---------- Registrar el pedido en la base de datos ----------
+  // Cada recurso pedido es una fila. Un combo (cancha + quincho) son dos filas del mismo grupo.
+  function requestRows() {
+    const combo = state.type === 'combo';
+    const grupo = combo && window.crypto && crypto.randomUUID ? crypto.randomUUID() : null;
+    const common = {
+      grupo,
+      combo,
+      fecha: iso(state.date),
+      nombre: state.name.trim(),
+      personas: Number(state.people),
+      notas: state.notes.trim() || null,
+    };
+    const rows = [];
+    if (hasCourt()) {
+      rows.push({
+        ...common, recurso: state.sport, cancha_n: state.n ? Number(state.n) : null,
+        hora_inicio: state.time, hora_fin: state.time + 1, tipo_evento: null,
+      });
+    }
+    if (hasQuincho()) {
+      rows.push({
+        ...common, recurso: 'quincho', cancha_n: null,
+        hora_inicio: state.qStart, hora_fin: state.qEnd, tipo_evento: state.event,
+      });
+    }
+    return rows;
+  }
+
+  // Devuelve 'ok', 'repetido' (ya se había enviado igual en esta sesión) o 'error'.
+  // Si falla, no pasa nada grave: el pedido igual se manda por WhatsApp.
+  async function saveRequest(rows) {
+    const fingerprint = JSON.stringify(rows.map(({ grupo, ...rest }) => rest));
+    try {
+      if (sessionStorage.getItem('coliseo.ultimoPedido') === fingerprint) return 'repetido';
+    } catch (e) { /* sin almacenamiento: se sigue igual */ }
+
+    const controller = new AbortController();
+    const timer = setTimeout(() => controller.abort(), 12000);
+    try {
+      const res = await fetch(`${SUPABASE.url}/rest/v1/solicitudes`, {
+        method: 'POST',
+        headers: { apikey: SUPABASE.key, 'Content-Type': 'application/json', Prefer: 'return=minimal' },
+        body: JSON.stringify(rows),
+        keepalive: true,
+        signal: controller.signal,
+      });
+      if (!res.ok) return 'error';
+      try { sessionStorage.setItem('coliseo.ultimoPedido', fingerprint); } catch (e) { /* idem */ }
+      return 'ok';
+    } catch (e) {
+      return 'error';
+    } finally {
+      clearTimeout(timer);
+    }
+  }
 
   // ---------- Preselect from the URL (?tipo=&deporte=&cancha=) ----------
   (function init() {

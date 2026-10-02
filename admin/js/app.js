@@ -65,6 +65,7 @@
     window.Quincho.init(db);
     window.Eventos.init(db);
     window.Resumen.init(db);
+    window.Solicitudes.init(db);
     window.PanelNav.start();
   }
 

@@ -19,6 +19,7 @@ window.Reservas = (() => {
   let detailId = null;       // reserva abierta en el detalle
   let loadToken = 0;
   let conflictToken = 0;
+  let formCallback = null;   // se llama con la reserva guardada (lo usa "Aceptar" en Solicitudes)
 
   // ---------- Elementos de la pantalla ----------
   const list = $('#day-list');
@@ -414,14 +415,15 @@ window.Reservas = (() => {
     editing = record || null;
     f.error.hidden = true;
     f.conflict.hidden = true;
-    f.title.textContent = record ? 'Editar reserva' : 'Nueva reserva';
     const p = preset || {};
+    f.title.textContent = record ? 'Editar reserva' : (p.title || 'Nueva reserva');
+    formCallback = p.onSaved || null;
 
     const r = record || {
       cancha_id: p.cancha_id || canchas[0].id, fecha: p.fecha || U.iso(day),
-      hora_inicio: p.hora_inicio || 17, hora_fin: p.hora_inicio ? p.hora_inicio + 1 : 18,
-      cliente: '', telefono: '', personas: '', tipo_evento: '',
-      monto_total: '', sena: '', estado: 'pendiente', notas: '',
+      hora_inicio: p.hora_inicio || 17, hora_fin: p.hora_fin || (p.hora_inicio ? p.hora_inicio + 1 : 18),
+      cliente: p.cliente || '', telefono: '', personas: p.personas || '', tipo_evento: p.tipo_evento || '',
+      monto_total: '', sena: '', estado: 'pendiente', notas: p.notas || '',
     };
 
     f.cancha.value = r.cancha_id;
@@ -560,9 +562,11 @@ window.Reservas = (() => {
     }
 
     remember(data);
+    const callback = formCallback;
+    formCallback = null;
     dlgForm.close();
     toast(editing ? 'Reserva actualizada.' : 'Reserva guardada.');
-    afterChange(r.fecha);
+    if (callback) callback(data[0]); else afterChange(r.fecha);
   }
 
   // ---------- Cancelar ----------
@@ -628,6 +632,8 @@ window.Reservas = (() => {
     });
 
     f.form.addEventListener('submit', save);
+    // Si se cierra el formulario sin guardar, el pedido que se estaba aceptando sigue pendiente.
+    dlgForm.addEventListener('close', () => { formCallback = null; });
     f.cancha.addEventListener('change', () => { syncQuincho(); renderPrices(); checkConflict(); });
     f.desde.addEventListener('change', () => { buildHastaSelect(); renderPrices(); checkConflict(); });
     f.hasta.addEventListener('change', () => { renderPrices(); checkConflict(); });
@@ -687,5 +693,6 @@ window.Reservas = (() => {
     init, openDetail, openForm, remember, card, toast,
     getCanchas: () => canchas,
     canchaName,
+    timeRange,
   };
 })();

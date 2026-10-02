@@ -63,6 +63,7 @@
       <button id="logout" class="btn btn-outline-light adm-out" type="button">Salir</button>
     </header>
     <nav class="adm-tabs" aria-label="Secciones del panel">
+      <button type="button" data-view="solicitudes" aria-current="false">Solicitudes <span id="sol-badge" class="tab-badge" hidden>0</span></button>
       <button type="button" data-view="calendario" aria-current="page">Calendario</button>
       <button type="button" data-view="lista" aria-current="false">Reservas</button>
       <button type="button" data-view="quincho" aria-current="false">Quincho</button>
@@ -72,6 +73,17 @@
 
     <main class="adm-main">
       <h1 id="view-title" class="adm-title">Calendario</h1>
+
+      <!-- Pedidos que llegan desde la página del cliente -->
+      <section data-section="solicitudes" class="adm-section" hidden>
+        <p class="adm-muted">Pedidos que los clientes hicieron desde la página. Aceptá los que tengan lugar y se cargan como reserva.</p>
+        <div class="seg-bar seg-bar--2" role="group" aria-label="Ver solicitudes">
+          <button type="button" data-sol="nuevas" aria-pressed="true">Nuevas</button>
+          <button type="button" data-sol="resueltas" aria-pressed="false">Resueltas</button>
+        </div>
+        <p id="sol-summary" class="day-summary" aria-live="polite"></p>
+        <div id="sol-list" class="sol-list"></div>
+      </section>
 
       <!-- Calendario y lista de reservas del día -->
       <section data-section="dia" class="adm-section">
@@ -308,6 +320,7 @@
   <script src="js/quincho.js"></script>
   <script src="js/eventos.js"></script>
   <script src="js/resumen.js"></script>
+  <script src="js/solicitudes.js"></script>
   <script src="js/app.js"></script>
 </body>
 </html>

@@ -21,10 +21,12 @@ Página aparte en `admin/` (no está enlazada desde el sitio público). Se entra
 - `admin/js/app.js`: inicio de sesión y control de permisos.
 - `admin/js/reservas.js`: calendario y lista del día (cargar, editar, cancelar, historial).
 - `admin/js/quincho.js`, `eventos.js`, `resumen.js`: secciones de quincho, eventos y torneos, y resumen de dinero.
+- `admin/js/solicitudes.js`: bandeja de pedidos que llegan desde la página del cliente (aceptar o rechazar).
 - `admin/js/nav.js`: pestañas del panel.
 - `db/01-tablas.sql`: tablas y reglas de seguridad (se pega una vez en Supabase > SQL Editor).
 - `db/02-administradores.sql`: autoriza a las personas. No subir con los emails reales.
 - `db/03-precios.sql`: precios de canchas y quincho (para cambiar un precio, se edita y se vuelve a correr).
+- `db/04-solicitudes.sql`: tabla de pedidos que llegan desde la página del cliente y sus reglas de seguridad.
 
 La seguridad no depende de esconder la clave: las reglas de la base de datos solo dejan leer y escribir a los administradores autorizados.
 
@@ -49,7 +51,14 @@ Después entrá a http://localhost:5173/.
 
 ## Cómo funciona la reserva
 
-El sitio no guarda reservas: arma un mensaje con la cancha o el quincho, el día, el horario y los datos, y lo envía por WhatsApp. La reserva queda confirmada cuando el complejo responde.
+El cliente completa el formulario (cancha, quincho o combo, día, horario, nombre y cantidad de personas). Al enviarlo pasan dos cosas a la vez:
+
+1. Se abre WhatsApp con el mensaje ya armado.
+2. El pedido se guarda en la tabla `solicitudes` de la base de datos. En el panel aparece en la pestaña **Solicitudes**, donde se acepta (se carga como reserva) o se rechaza.
+
+La reserva queda confirmada cuando el complejo responde. Si falla el guardado, el cliente igual puede mandar el mensaje por WhatsApp.
+
+Cualquiera puede **enviar** una solicitud, pero nadie sin cuenta autorizada puede **leer** ninguna. Hay un tope de 40 pedidos cada 10 minutos contra abusos (`db/04-solicitudes.sql`).
 
 Se puede preseleccionar desde un enlace: `reservar.html?tipo=cancha|quincho|combo&deporte=f5|f6|padel&cancha=2`.
 

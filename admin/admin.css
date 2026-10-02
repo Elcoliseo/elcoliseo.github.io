@@ -268,6 +268,31 @@ body.adm { background: var(--chalk); min-height: 100vh; }
   .ev-actions { grid-column: auto; flex-direction: column; flex-wrap: nowrap; }
 }
 
+/* ---------- Solicitudes ---------- */
+.tab-badge {
+  display: inline-block; min-width: 1.5rem; margin-left: .35rem; padding: .05rem .45rem;
+  border-radius: 999px; background: var(--error); color: #fff; font-size: .8rem; font-weight: 800; text-align: center;
+}
+.seg-bar--2 { grid-template-columns: repeat(2, minmax(0, 1fr)); }
+.sol-list { display: grid; gap: .75rem; }
+.sol-card {
+  display: grid; gap: .45rem; padding: 1rem; background: #fff;
+  border: 2px solid var(--line); border-left: 8px solid var(--sun); border-radius: 14px;
+}
+.sol--resuelta { background: #f1f3f0; border-left-color: var(--st-cancelada); }
+.sol-head { display: flex; flex-wrap: wrap; align-items: center; gap: .4rem .6rem; }
+.sol-head h3 { font: 800 1.35rem/1.1 var(--display); text-transform: uppercase; color: var(--turf); margin-right: auto; }
+.sol-ago { font-size: .85rem; color: var(--ink-soft); }
+.sol-when { font-weight: 700; }
+.sol-when::first-letter { text-transform: uppercase; }
+.sol-who { overflow-wrap: anywhere; }
+.sol-avail { padding: .5rem .75rem; border-radius: 10px; font-weight: 700; }
+.sol-avail--ok { background: #e0f4e6; color: #14602d; }
+.sol-avail--warn { background: #fdecea; color: #7a1610; }
+.sol-by { font-size: .85rem; color: var(--ink-soft); }
+.sol-actions { display: flex; flex-wrap: wrap; gap: .5rem; margin-top: .25rem; }
+.sol-actions .btn { flex: 1 1 11rem; }
+
 /* ---------- Botón flotante y aviso ---------- */
 .fab {
   position: fixed; right: 1rem; bottom: calc(1rem + env(safe-area-inset-bottom, 0px)); z-index: 15;

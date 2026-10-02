@@ -3,6 +3,14 @@
 
   const WA_NUMBER = '5493764110811';
 
+  // Conexión con la base de datos (Supabase) para registrar los pedidos de reserva.
+  // Estos dos datos son PÚBLICOS y es seguro que estén acá: con ellos solo se pueden
+  // ENVIAR pedidos, no leer nada. Nunca poner acá la clave secreta ni la service_role.
+  const SUPABASE = {
+    url: 'https://hlauxcfcpmltanwplrvk.supabase.co',
+    key: 'sb_publishable_8nHaV46rAwcyAd3it3BikQ_cXpjdvYP',
+  };
+
   const waLink = (text) =>
     `https://wa.me/${WA_NUMBER}` + (text ? `?text=${encodeURIComponent(text)}` : '');
 
@@ -181,5 +189,5 @@
     mountArt();
   });
 
-  window.Coliseo = { WA_NUMBER, SPORTS, COURTS, HOURS, PRICES, fmtHour, fmtMoney, courtPrice, waLink, mountPlan };
+  window.Coliseo = { WA_NUMBER, SUPABASE, SPORTS, COURTS, HOURS, PRICES, fmtHour, fmtMoney, courtPrice, waLink, mountPlan };
 })();

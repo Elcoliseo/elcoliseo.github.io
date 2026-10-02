@@ -54,6 +54,17 @@ window.PanelUtil = (() => {
       day: 'numeric', month: 'numeric', hour: '2-digit', minute: '2-digit', hour12: false,
     }).replace(',', ' a las');
 
+  // "hace 5 min", "hace 2 h", "hace 3 días"
+  const timeAgo = (ts) => {
+    const min = Math.max(0, Math.round((Date.now() - new Date(ts).getTime()) / 60000));
+    if (min < 1) return 'recién';
+    if (min < 60) return `hace ${min} min`;
+    const h = Math.round(min / 60);
+    if (h < 24) return `hace ${h} h`;
+    const d = Math.round(h / 24);
+    return `hace ${d} ${d === 1 ? 'día' : 'días'}`;
+  };
+
   // Todo texto que escribe una persona se "escapa" antes de mostrarlo en pantalla,
   // para que nadie pueda meter código raro desde un nombre o una nota.
   const esc = (s) => String(s ?? '').replace(/[&<>"']/g, (c) =>
@@ -62,6 +73,6 @@ window.PanelUtil = (() => {
   return {
     HOURS, ESTADOS, EVENTOS, TIPOS,
     range, fmtHour, iso, parseISO, addDays, today,
-    fmtDayLong, fmtDayShort, fmtMoney, fmtDateTime, esc,
+    fmtDayLong, fmtDayShort, fmtMoney, fmtDateTime, timeAgo, esc,
   };
 })();

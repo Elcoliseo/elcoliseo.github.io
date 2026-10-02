@@ -6,6 +6,11 @@
   const waLink = (text) =>
     `https://wa.me/${WA_NUMBER}` + (text ? `?text=${encodeURIComponent(text)}` : '');
 
+  // Opening hours: 17:00 to 01:00. Hours past midnight count on from 24
+  // (24 = 00:00, 25 = 01:00), so a turn that starts at h always ends at h + 1.
+  const HOURS = { open: 17, close: 25 };
+  const fmtHour = (h) => `${String(h % 24).padStart(2, '0')}:00`;
+
   const SPORTS = {
     f5:    { name: 'Fútbol 5', short: 'F5',    type: 'football', count: 3, icon: { w: 90,  h: 150 } },
     f6:    { name: 'Fútbol 6', short: 'F6',    type: 'football', count: 2, icon: { w: 100, h: 150 } },
@@ -151,5 +156,5 @@
     mountArt();
   });
 
-  window.Coliseo = { WA_NUMBER, SPORTS, COURTS, waLink, mountPlan };
+  window.Coliseo = { WA_NUMBER, SPORTS, COURTS, HOURS, fmtHour, waLink, mountPlan };
 })();

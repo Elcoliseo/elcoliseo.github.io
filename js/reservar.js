@@ -1,7 +1,7 @@
 (() => {
   'use strict';
 
-  const { SPORTS, mountPlan, waLink } = window.Coliseo;
+  const { SPORTS, HOURS, fmtHour, mountPlan, waLink } = window.Coliseo;
 
   const $ = (sel, root = document) => root.querySelector(sel);
 
@@ -11,6 +11,7 @@
     combo:   'Combo cancha + quincho',
   };
 
+  // time, qStart and qEnd hold whole hours ('' = not chosen); 24 is 00:00, 25 is 01:00.
   const state = {
     type: '', sport: '', n: '',
     date: null, time: '',
@@ -26,6 +27,20 @@
   const today = startOfDay(new Date());
   const sameDay = (a, b) => a && b && a.getTime() === b.getTime();
   const iso = (d) => `${d.getFullYear()}-${String(d.getMonth() + 1).padStart(2, '0')}-${String(d.getDate()).padStart(2, '0')}`;
+
+  const range = (from, to) => Array.from({ length: to - from }, (_, i) => from + i);
+  const span = (a, b) => `${fmtHour(a)} a ${fmtHour(b)}`;
+
+  // "de 21:00 a 01:00", with a note when the time crosses midnight
+  const when = (a, b) => `de ${span(a, b)}` +
+    (a >= 24 ? ' (turno de medianoche de ese día)' : b > 24 ? ' (hasta pasada la medianoche)' : '');
+
+  // A turn that starts at hour h is unavailable once it has begun (only matters for today).
+  const isPast = (h) => {
+    if (!state.date || !sameDay(state.date, today)) return false;
+    const d = state.date;
+    return new Date(d.getFullYear(), d.getMonth(), d.getDate(), h) <= new Date();
+  };
 
   const fmtDate = (d, withYear = false) =>
     d.toLocaleDateString('es-AR', {
@@ -103,10 +118,11 @@
   const sumDone = $('#sum-done');
   const sendBtn = $('#send');
 
+  const slotsEl = $('#t-slots');
+  const startSel = $('#q-start');
+  const endSel = $('#q-end');
+
   const fields = {
-    time:   $('#t-time'),
-    qStart: $('#q-start'),
-    qEnd:   $('#q-end'),
     people: $('#q-people'),
     event:  $('#q-event'),
     name:   $('#f-name'),
@@ -126,7 +142,44 @@
     },
   });
 
-  const calendar = mountCalendar($('#cal'), (d) => { state.date = d; render(false); });
+  const calendar = mountCalendar($('#cal'), (d) => {
+    state.date = d;
+    // Drop any chosen hour that has already passed on the new date.
+    if (state.time !== '' && isPast(state.time)) state.time = '';
+    if (state.qStart !== '' && isPast(state.qStart)) { state.qStart = ''; state.qEnd = ''; }
+    render(false);
+  });
+
+  // ---------- Hourly turns ----------
+  const { open, close } = HOURS;
+
+  slotsEl.innerHTML = range(open, close).map((h) => `
+    <label class="slot">
+      <input type="radio" name="slot" value="${h}">
+      <span><strong>${fmtHour(h)}</strong><small>a ${fmtHour(h + 1)}</small></span>
+    </label>`).join('');
+
+  startSel.innerHTML = '<option value="">Elegí la hora</option>' +
+    range(open, close).map((h) => `<option value="${h}">${fmtHour(h)}</option>`).join('');
+
+  function rebuildEnd() {
+    const from = state.qStart === '' ? open + 1 : state.qStart + 1;
+    endSel.innerHTML = '<option value="">Elegí la hora</option>' +
+      range(from, close + 1).map((h) => `<option value="${h}">${fmtHour(h)}</option>`).join('');
+    endSel.disabled = state.qStart === '';
+    endSel.value = state.qEnd === '' ? '' : String(state.qEnd);
+  }
+
+  function updateTimes() {
+    slotsEl.querySelectorAll('input').forEach((r) => {
+      const h = Number(r.value);
+      r.disabled = isPast(h);
+      r.checked = state.time === h;
+    });
+    [...startSel.options].forEach((o) => { if (o.value !== '') o.disabled = isPast(Number(o.value)); });
+    startSel.value = state.qStart === '' ? '' : String(state.qStart);
+    rebuildEnd();
+  }
 
   // ---------- Summary ----------
   const courtLabel = () => {
@@ -145,10 +198,13 @@
 
   const timeLabel = () => {
     const lines = [];
-    if (hasCourt() && state.time) lines.push(hasQuincho() ? `Cancha: ${state.time}` : state.time);
-    if (hasQuincho() && state.qStart) {
-      const range = state.qEnd ? `${state.qStart} a ${state.qEnd}` : `desde ${state.qStart}`;
-      lines.push(hasCourt() ? `Quincho: ${range}` : range);
+    if (hasCourt() && state.time !== '') {
+      const t = span(state.time, state.time + 1);
+      lines.push(hasQuincho() ? `Cancha: ${t}` : t);
+    }
+    if (hasQuincho() && state.qStart !== '') {
+      const t = state.qEnd !== '' ? span(state.qStart, state.qEnd) : `desde ${fmtHour(state.qStart)}`;
+      lines.push(hasCourt() ? `Quincho: ${t}` : t);
     }
     return lines.join('\n');
   };
@@ -176,6 +232,7 @@
     });
 
     plan.set(state.sport, state.n);
+    updateTimes();
 
     if (!state.sport) {
       status.textContent = 'Elegí el deporte y tocá una cancha en el plano.';
@@ -206,6 +263,28 @@
     }
   });
 
+  slotsEl.addEventListener('change', (e) => {
+    state.time = Number(e.target.value);
+    renderSummary();
+    sumDone.hidden = true;
+  });
+
+  startSel.addEventListener('change', () => {
+    state.qStart = startSel.value === '' ? '' : Number(startSel.value);
+    if (state.qEnd !== '' && state.qEnd <= state.qStart) state.qEnd = '';
+    startSel.removeAttribute('aria-invalid');
+    rebuildEnd();
+    renderSummary();
+    sumDone.hidden = true;
+  });
+
+  endSel.addEventListener('change', () => {
+    state.qEnd = endSel.value === '' ? '' : Number(endSel.value);
+    endSel.removeAttribute('aria-invalid');
+    renderSummary();
+    sumDone.hidden = true;
+  });
+
   Object.entries(fields).forEach(([key, el]) => {
     el.addEventListener('input', () => {
       state[key] = el.value;
@@ -225,8 +304,9 @@
       if (!state.event) m.push({ label: 'el tipo de evento', el: '#q-event' });
     }
     if (!state.date) m.push({ label: 'el día', el: '#step-date' });
-    if (hasCourt() && !state.time) m.push({ label: 'el horario de la cancha', el: '#t-time' });
-    if (hasQuincho() && !state.qStart) m.push({ label: 'el horario de inicio del quincho', el: '#q-start' });
+    if (hasCourt() && state.time === '') m.push({ label: 'el turno de la cancha', el: '#t-slots' });
+    if (hasQuincho() && state.qStart === '') m.push({ label: 'la hora de inicio del quincho', el: '#q-start' });
+    if (hasQuincho() && state.qStart !== '' && state.qEnd === '') m.push({ label: 'la hora de fin del quincho', el: '#q-end' });
     if (!state.name.trim()) m.push({ label: 'tu nombre', el: '#f-name' });
     return m;
   }
@@ -236,16 +316,16 @@
     const court = `${SPORTS[state.sport] ? SPORTS[state.sport].name : ''}` +
       (state.n ? `, cancha ${state.n}` : ' (cualquier cancha disponible)');
     const people = `${state.people} ${Number(state.people) === 1 ? 'persona' : 'personas'}`;
-    const quincho = `desde las ${state.qStart}` + (state.qEnd ? ` hasta las ${state.qEnd}` : '') +
-      `, para ${people} (${state.event.toLowerCase()})`;
+    const turn = when(state.time, state.time + 1);
+    const quincho = `${when(state.qStart, state.qEnd)}, para ${people} (${state.event.toLowerCase()})`;
 
     let what;
     if (state.type === 'cancha') {
-      what = `reservar ${court} el ${date} a las ${state.time}`;
+      what = `reservar ${court} el ${date}, ${turn}`;
     } else if (state.type === 'quincho') {
-      what = `reservar el quincho con parrilla el ${date} ${quincho}`;
+      what = `reservar el quincho con parrilla el ${date}, ${quincho}`;
     } else {
-      what = `reservar el combo cancha + quincho el ${date}: ${court} a las ${state.time} y el quincho ${quincho}`;
+      what = `reservar el combo cancha + quincho el ${date}: ${court} ${turn} y el quincho ${quincho}`;
     }
 
     let msg = `Hola, soy ${state.name.trim()}. Quiero ${what}.`;

@@ -42,4 +42,5 @@ Se puede preseleccionar desde un enlace: `reservar.html?tipo=cancha|quincho|comb
 - Número de WhatsApp: constante `WA_NUMBER` en `js/common.js` y los enlaces `wa.me` en los `.html`.
 - Dirección: pie de página de cada `.html`, `contacto.html` y los datos estructurados de `index.html`.
 - Cantidad de canchas: `SPORTS` y `COURTS` en `js/common.js`.
+- Horario de atención: `HOURS` en `js/common.js` (hoy de 17:00 a 01:00; las horas pasada la medianoche cuentan desde 24, así `25` es la 01:00) y los textos "Abierto de 17:00 a 01:00" en los `.html`.
 - Tipos de evento del quincho: opciones de `#q-event` en `reservar.html`.

@@ -17,16 +17,41 @@
     padel: { name: 'Pádel',    short: 'Pádel', type: 'padel',    count: 2, icon: { w: 70,  h: 140 } },
   };
 
+  // Precios por hora. La luz se cobra desde las 19:00 (luzDesde).
+  // El quincho se alquila por evento, no por hora.
+  const PRICES = {
+    luzDesde: 19,
+    f5:    { sinLuz: 30000, conLuz: 35000 },
+    f6:    { sinLuz: 30000, conLuz: 35000 },
+    padel: { sinLuz: 25000, conLuz: 30000 },
+    quincho: 100000,
+  };
+
+  const fmtMoney = (n) =>
+    Number(n).toLocaleString('es-AR', { style: 'currency', currency: 'ARS', maximumFractionDigits: 0 });
+
+  // Precio de una cancha entre dos horas (cada hora vale distinto según haya luz o no).
+  const courtPrice = (sport, from, to) => {
+    let total = 0;
+    for (let h = from; h < to; h++) total += h >= PRICES.luzDesde ? PRICES[sport].conLuz : PRICES[sport].sinLuz;
+    return total;
+  };
+
   // Plan layout in a 640x520 space: courts are drawn top-down, not to scale.
+  // Las canchas de fútbol se numeran del 1 al 5 (1 a 3 son de fútbol 5 y 4 y 5 de fútbol 6);
+  // las de pádel son Pádel 1 y Pádel 2.
   const COURTS = [
     { sport: 'f5',    n: 1, x: 30,  y: 50,  w: 135, h: 200 },
     { sport: 'f5',    n: 2, x: 180, y: 50,  w: 135, h: 200 },
     { sport: 'f5',    n: 3, x: 330, y: 50,  w: 135, h: 200 },
     { sport: 'padel', n: 1, x: 490, y: 50,  w: 120, h: 200 },
-    { sport: 'f6',    n: 1, x: 30,  y: 290, w: 210, h: 200 },
-    { sport: 'f6',    n: 2, x: 255, y: 290, w: 210, h: 200 },
+    { sport: 'f6',    n: 4, x: 30,  y: 290, w: 210, h: 200 },
+    { sport: 'f6',    n: 5, x: 255, y: 290, w: 210, h: 200 },
     { sport: 'padel', n: 2, x: 490, y: 290, w: 120, h: 200 },
   ];
+
+  // Texto corto que va arriba de cada cancha en el plano: "1 · F5", "4 · F6", "Pádel 1".
+  const courtLabel = (c) => (c.sport === 'padel' ? `Pádel ${c.n}` : `${c.n} · ${SPORTS[c.sport].short}`);
 
   // ---------- Court drawings ----------
   const footballLines = (w, h) => {
@@ -74,7 +99,7 @@
             <rect class="court-fill" width="${c.w}" height="${c.h}"/>
             <rect class="court-ring" x="-6" y="-6" width="${c.w + 12}" height="${c.h + 12}" rx="6"/>
             <g class="lines">${linesFor(c.sport, c.w, c.h)}</g>
-            <text class="court-label" x="0" y="-12">${s.short} · ${c.n}</text>
+            <text class="court-label" x="0" y="-12">${courtLabel(c)}</text>
           </g>`;
       }).join('');
 
@@ -156,5 +181,5 @@
     mountArt();
   });
 
-  window.Coliseo = { WA_NUMBER, SPORTS, COURTS, HOURS, fmtHour, waLink, mountPlan };
+  window.Coliseo = { WA_NUMBER, SPORTS, COURTS, HOURS, PRICES, fmtHour, fmtMoney, courtPrice, waLink, mountPlan };
 })();

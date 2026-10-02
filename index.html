@@ -74,7 +74,7 @@
             <p id="plan-status" class="plan-status" aria-live="polite">Tocá una cancha del plano para elegirla.</p>
             <a id="plan-go" class="btn btn-sun" href="reservar.html" hidden>Elegir día y horario</a>
           </div>
-          <figcaption class="plan-note">Plano esquemático, sin escala. F5 es fútbol 5 y F6 es fútbol 6.</figcaption>
+          <figcaption class="plan-note">Plano esquemático, sin escala. F5 es fútbol 5 y F6 es fútbol 6; los números son los de cada cancha.</figcaption>
         </figure>
       </div>
     </section>
@@ -90,6 +90,7 @@
           <article class="svc svc--canchas">
             <h3>Canchas</h3>
             <p>Fútbol 5, fútbol 6 con césped sintético y pádel con paredes Blindex.</p>
+            <p class="svc-price">Desde $25.000 la hora.</p>
             <ul class="svc-counts">
               <li><strong>3</strong><span>de<br>fútbol 5</span></li>
               <li><strong>2</strong><span>de<br>fútbol 6</span></li>
@@ -104,6 +105,7 @@
           <article class="svc svc--quincho">
             <h3>Quincho con parrilla</h3>
             <p>Techado y al aire libre, con parrilla equipada, climatizado y estacionamiento. Ideal para cumpleaños y eventos infantiles.</p>
+            <p class="svc-price">$100.000 el alquiler.</p>
             <div class="svc-actions">
               <a class="btn btn-sun" href="reservar.html?tipo=quincho">Reservar quincho</a>
               <a class="text-link" href="quincho.html">Ver el quincho</a>
@@ -119,6 +121,40 @@
             <a class="btn btn-sun btn-lg" href="reservar.html?tipo=combo">Armar el combo</a>
           </aside>
         </div>
+      </div>
+    </section>
+
+    <section class="prices" id="precios" aria-labelledby="precios-title">
+      <div class="wrap prices-grid">
+        <div>
+          <h2 id="precios-title" class="section-title">Precios y horarios</h2>
+          <p class="section-lede">Los turnos son de una hora. Abrimos de 17:00 a 01:00 y la luz se cobra desde las 19:00.</p>
+        </div>
+        <table class="price-table">
+          <caption class="sr-only">Precios por hora de las canchas y del quincho</caption>
+          <thead>
+            <tr><th scope="col">Por hora</th><th scope="col">Sin luz</th><th scope="col">Con luz</th></tr>
+          </thead>
+          <tbody>
+            <tr><th scope="row">Fútbol 5 y fútbol 6</th><td>$30.000</td><td>$35.000</td></tr>
+            <tr><th scope="row">Pádel</th><td>$25.000</td><td>$30.000</td></tr>
+            <tr><th scope="row">Quincho (por alquiler)</th><td colspan="2">$100.000</td></tr>
+          </tbody>
+        </table>
+      </div>
+    </section>
+
+    <section class="cantina" id="cantina" aria-labelledby="cantina-title">
+      <div class="wrap cantina-inner">
+        <div>
+          <h2 id="cantina-title" class="section-title">Cantina</h2>
+          <p class="section-lede">Para acompañar el partido o el evento.</p>
+        </div>
+        <ul class="cantina-list">
+          <li>Snacks</li>
+          <li>Galletitas</li>
+          <li>Bebidas frías</li>
+        </ul>
       </div>
     </section>
 

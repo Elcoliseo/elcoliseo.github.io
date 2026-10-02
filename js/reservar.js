@@ -1,7 +1,7 @@
 (() => {
   'use strict';
 
-  const { SPORTS, HOURS, fmtHour, mountPlan, waLink } = window.Coliseo;
+  const { SPORTS, COURTS, HOURS, PRICES, fmtHour, fmtMoney, courtPrice, mountPlan, waLink } = window.Coliseo;
 
   const $ = (sel, root = document) => root.querySelector(sel);
 
@@ -189,11 +189,20 @@
       : `${SPORTS[state.sport].name}, cualquiera disponible`;
   };
 
-  const quinchoLabel = () => {
-    const parts = [];
-    if (state.people) parts.push(`${state.people} ${Number(state.people) === 1 ? 'persona' : 'personas'}`);
-    if (state.event) parts.push(state.event);
-    return parts.join(' · ');
+  const peopleLabel = () => (state.people
+    ? `${state.people} ${Number(state.people) === 1 ? 'persona' : 'personas'}`
+    : '');
+
+  // Precio orientativo: cada hora de cancha vale distinto con luz (desde las 19:00) o sin luz.
+  // El quincho se alquila por evento.
+  const estimate = () => {
+    let total = 0;
+    if (hasCourt()) {
+      if (!state.sport || state.time === '') return null;
+      total += courtPrice(state.sport, state.time, state.time + 1);
+    }
+    if (hasQuincho()) total += PRICES.quincho;
+    return total;
   };
 
   const timeLabel = () => {
@@ -212,10 +221,15 @@
   function renderSummary() {
     const rows = [['Reserva', TYPES[state.type] || '', 'Sin elegir']];
     if (hasCourt()) rows.push(['Cancha', courtLabel(), 'Sin elegir']);
-    if (hasQuincho()) rows.push(['Quincho', quinchoLabel(), 'Sin completar']);
+    if (hasQuincho()) rows.push(['Evento', state.event, 'Sin elegir']);
     rows.push(['Día', state.date ? fmtDate(state.date) : '', 'Sin elegir']);
     rows.push(['Horario', timeLabel(), 'Sin completar']);
+    rows.push(['Personas', peopleLabel(), 'Sin completar']);
     rows.push(['A nombre de', state.name.trim(), 'Sin completar']);
+    if (state.type) {
+      const price = estimate();
+      rows.push(['Precio estimado', price === null ? '' : fmtMoney(price), 'Se calcula al elegir el horario']);
+    }
 
     sumList.innerHTML = rows.map(([label, value, empty]) => `
       <div>
@@ -299,15 +313,13 @@
     const m = [];
     if (!state.type) return [{ label: 'qué querés reservar', el: '#step-type' }];
     if (hasCourt() && !state.sport) m.push({ label: 'el deporte', el: '#step-court' });
-    if (hasQuincho()) {
-      if (!(Number(state.people) >= 1)) m.push({ label: 'la cantidad de personas', el: '#q-people' });
-      if (!state.event) m.push({ label: 'el tipo de evento', el: '#q-event' });
-    }
+    if (hasQuincho() && !state.event) m.push({ label: 'el tipo de evento', el: '#q-event' });
     if (!state.date) m.push({ label: 'el día', el: '#step-date' });
     if (hasCourt() && state.time === '') m.push({ label: 'el turno de la cancha', el: '#t-slots' });
     if (hasQuincho() && state.qStart === '') m.push({ label: 'la hora de inicio del quincho', el: '#q-start' });
     if (hasQuincho() && state.qStart !== '' && state.qEnd === '') m.push({ label: 'la hora de fin del quincho', el: '#q-end' });
     if (!state.name.trim()) m.push({ label: 'tu nombre', el: '#f-name' });
+    if (!(Number(state.people) >= 1)) m.push({ label: 'la cantidad de personas', el: '#q-people' });
     return m;
   }
 
@@ -321,7 +333,7 @@
 
     let what;
     if (state.type === 'cancha') {
-      what = `reservar ${court} el ${date}, ${turn}`;
+      what = `reservar ${court} el ${date}, ${turn}, para ${people}`;
     } else if (state.type === 'quincho') {
       what = `reservar el quincho con parrilla el ${date}, ${quincho}`;
     } else {
@@ -369,7 +381,8 @@
     if (SPORTS[deporte]) {
       state.sport = deporte;
       if (!state.type) state.type = 'cancha';
-      if (cancha && Number(cancha) >= 1 && Number(cancha) <= SPORTS[deporte].count) state.n = String(Number(cancha));
+      // El número de cancha es el de verdad: 1 a 3 de fútbol 5, 4 y 5 de fútbol 6, 1 y 2 de pádel.
+      if (cancha && COURTS.some((c) => c.sport === deporte && c.n === Number(cancha))) state.n = String(Number(cancha));
     }
     render();
   })();

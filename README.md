@@ -12,6 +12,22 @@ Es un sitio estático de varias páginas, sin dependencias ni paso de compilaci�
 - `reservar.html`: asistente de reserva (cancha, quincho o combo) con calendario.
 - `contacto.html`: dirección, WhatsApp y mapa.
 
+## Panel de administración
+
+Página aparte en `admin/` (no está enlazada desde el sitio público). Se entra con email y contraseña y solo pueden usarla las personas autorizadas. Los datos se guardan en Supabase (base de datos gratuita).
+
+- `admin/index.html`, `admin/admin.css`: pantallas, pensadas para el celular.
+- `admin/js/config.js`: dirección del proyecto y clave **pública** de Supabase (es seguro que esté en el código; nunca poner acá la clave secreta ni la `service_role`).
+- `admin/js/app.js`: inicio de sesión y control de permisos.
+- `admin/js/reservas.js`: calendario y lista del día (cargar, editar, cancelar, historial).
+- `admin/js/quincho.js`, `eventos.js`, `resumen.js`: secciones de quincho, eventos y torneos, y resumen de dinero.
+- `admin/js/nav.js`: pestañas del panel.
+- `db/01-tablas.sql`: tablas y reglas de seguridad (se pega una vez en Supabase > SQL Editor).
+- `db/02-administradores.sql`: autoriza a las personas. No subir con los emails reales.
+- `db/03-precios.sql`: precios de canchas y quincho (para cambiar un precio, se edita y se vuelve a correr).
+
+La seguridad no depende de esconder la clave: las reglas de la base de datos solo dejan leer y escribir a los administradores autorizados.
+
 ## Archivos
 
 - `styles.css`: estilos y colores de la marca (azul `#007ABD`, verde `#00923D`, naranja brasa del quincho).
@@ -42,5 +58,7 @@ Se puede preseleccionar desde un enlace: `reservar.html?tipo=cancha|quincho|comb
 - Número de WhatsApp: constante `WA_NUMBER` en `js/common.js` y los enlaces `wa.me` en los `.html`.
 - Dirección: pie de página de cada `.html`, `contacto.html` y los datos estructurados de `index.html`.
 - Cantidad de canchas: `SPORTS` y `COURTS` en `js/common.js`.
+- Precios: se cambian en **tres** lugares. En `js/common.js` (`PRICES`, para el precio estimado de la reserva), en los textos de `index.html`, `canchas.html`, `quincho.html` y `reservar.html` (preguntas frecuentes), y en la base de datos con `db/03-precios.sql` (para el panel). La luz se cobra desde las 19:00 (`luzDesde`, en `js/common.js` y `admin/js/util.js`).
+- Numeración de canchas: 1 a 3 son de fútbol 5, 4 y 5 de fútbol 6, más Pádel 1 y 2 (`COURTS` en `js/common.js` y la tabla `canchas` de la base de datos).
 - Horario de atención: `HOURS` en `js/common.js` (hoy de 17:00 a 01:00; las horas pasada la medianoche cuentan desde 24, así `25` es la 01:00) y los textos "Abierto de 17:00 a 01:00" en los `.html`.
 - Tipos de evento del quincho: opciones de `#q-event` en `reservar.html`.

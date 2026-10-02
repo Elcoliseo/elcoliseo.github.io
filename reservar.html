@@ -95,21 +95,15 @@
 
           <fieldset class="step" id="step-event" data-for="quincho combo" hidden>
             <legend>Datos del quincho</legend>
-            <div class="field-row">
-              <div class="field">
-                <label for="q-event">Tipo de evento</label>
-                <select id="q-event" name="event">
-                  <option value="">Elegí una opción</option>
-                  <option>Cumpleaños</option>
-                  <option>Evento infantil</option>
-                  <option>Reunión de amigos o familia</option>
-                  <option>Otro</option>
-                </select>
-              </div>
-              <div class="field">
-                <label for="q-people">Cantidad de personas</label>
-                <input id="q-people" name="people" type="number" min="1" inputmode="numeric">
-              </div>
+            <div class="field">
+              <label for="q-event">Tipo de evento</label>
+              <select id="q-event" name="event">
+                <option value="">Elegí una opción</option>
+                <option>Cumpleaños</option>
+                <option>Evento infantil</option>
+                <option>Reunión de amigos o familia</option>
+                <option>Otro</option>
+              </select>
             </div>
           </fieldset>
 
@@ -149,6 +143,10 @@
               <input id="f-name" name="name" type="text" autocomplete="name">
             </div>
             <div class="field" style="margin-top: 1rem">
+              <label for="q-people">Cantidad de personas</label>
+              <input id="q-people" name="people" type="number" min="1" inputmode="numeric">
+            </div>
+            <div class="field" style="margin-top: 1rem">
               <label for="f-notes">Comentarios <span class="opt">(opcional)</span></label>
               <textarea id="f-notes" name="notes"></textarea>
             </div>
@@ -164,7 +162,7 @@
             Enviar por WhatsApp
           </button>
           <p id="sum-done" class="sum-done" aria-live="polite" hidden></p>
-          <p class="sum-note">Se abre WhatsApp con el mensaje armado. Todavía no es una reserva confirmada: te respondemos con la disponibilidad.</p>
+          <p class="sum-note">Se abre WhatsApp con el mensaje armado. Todavía no es una reserva confirmada: te respondemos con la disponibilidad. El precio es orientativo.</p>
         </aside>
       </div>
     </section>
@@ -178,6 +176,10 @@
           <details>
             <summary>¿Cómo reservo?</summary>
             <p>Elegís cancha, quincho o combo, marcás el día y el horario, y enviás el pedido. Se abre WhatsApp con el mensaje ya escrito para que solo tengas que mandarlo.</p>
+          </details>
+          <details>
+            <summary>¿Cuánto cuesta?</summary>
+            <p>Las canchas de fútbol 5 y fútbol 6 cuestan $30.000 la hora sin luz y $35.000 con luz. El pádel cuesta $25.000 sin luz y $30.000 con luz. La luz se cobra desde las 19:00. El quincho se alquila a $100.000.</p>
           </details>
           <details>
             <summary>¿En qué horario atienden y cómo son los turnos?</summary>

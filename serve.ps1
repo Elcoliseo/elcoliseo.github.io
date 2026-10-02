@@ -18,6 +18,8 @@ while ($listener.IsListening) {
   $path = [Uri]::UnescapeDataString($ctx.Request.Url.AbsolutePath.TrimStart('/'))
   if ([string]::IsNullOrEmpty($path)) { $path = 'index.html' }
   $file = [IO.Path]::GetFullPath((Join-Path $root $path))
+  # Like GitHub Pages: a folder URL serves the index.html inside it.
+  if (Test-Path $file -PathType Container) { $file = Join-Path $file 'index.html' }
 
   if ($file.StartsWith($root) -and (Test-Path $file -PathType Leaf)) {
     $ext = [IO.Path]::GetExtension($file).ToLower()
